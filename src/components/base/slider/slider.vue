@@ -45,9 +45,12 @@ export default {
         this._play()
       }
     }, 20)
+    window.onresize = () => {
+      this._setSilderWidth(true)
+    }
   },
   methods: {
-    _setSilderWidth () {
+    _setSilderWidth (isResize) {
       this.children = this.$refs.sliderGroup.children
       let width = 0
       let sliderWidth = this.$refs.slider.clientWidth
@@ -57,7 +60,7 @@ export default {
         child.style.width = sliderWidth + 'px'
         width += sliderWidth
       }
-      if (this.loop) {
+      if (this.loop && !isResize) {
         width += sliderWidth * 2
       }
       this.$refs.sliderGroup.style.width = width + 'px'
@@ -83,7 +86,8 @@ export default {
       })
     },
     _initDots () {
-      this.dots = new Array(this.children.length - 2)
+      let length = this.loop ? this.children.length - 2 : this.children.length
+      this.dots = new Array(length)
     },
     _play () {
       this.timer = setTimeout(() => {

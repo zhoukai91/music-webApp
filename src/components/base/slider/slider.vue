@@ -4,6 +4,10 @@
       <slot>
       </slot>
     </div>
+    <div class="dots">
+      <!--eslint-disable-->
+      <span class="dot" :class="{'active': currentPageIndex === index}" v-for="(item, index) in dots"></span>
+    </div>
   </div>
 </template>
 
@@ -26,10 +30,20 @@ export default {
       default: 3000
     }
   },
+  data () {
+    return {
+      dots: [],
+      currentPageIndex: 0
+    }
+  },
   mounted () {
     setTimeout(() => {
       this._setSilderWidth()
       this._initSlider()
+      this._initDots()
+      if (this.autoplay) {
+        this._play()
+      }
     }, 20)
   },
   methods: {
@@ -49,17 +63,32 @@ export default {
       this.$refs.sliderGroup.style.width = width + 'px'
     },
     _initSlider () {
-      console.log(this.loop)
-      this.BScroll = new BScroll(this.$refs.slider, {
+      this.slider = new BScroll(this.$refs.slider, {
         scrollX: true,
         scrollY: false,
         click: true,
         momentum: false,
         snap: {
           loop: this.loop,
-          threshold: 0.3
+          threshold: 0.3,
+          speed: 400
         }
       })
+      this.slider.on('scrollEnd', () => {
+        this.currentPageIndex = this.slider.getCurrentPage().pageX
+        if (this.autoplay) {
+          clearTimeout(this.timer)
+          this._play()
+        }
+      })
+    },
+    _initDots () {
+      this.dots = new Array(this.children.length - 2)
+    },
+    _play () {
+      this.timer = setTimeout(() => {
+        this.slider.next(400)
+      }, this.interval)
     }
   }
 }
@@ -70,6 +99,7 @@ export default {
 
   .slider
     min-height: 1px
+    position: relative
     .slider-group
       position: relative
       overflow: hidden

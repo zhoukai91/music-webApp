@@ -12,3 +12,19 @@ export function getRecommend () {
 
   return jsonp(url, data, options)
 }
+
+export function getDiscList () {
+  const url = 'https://c.y.qq.com/v8/fcg-bin/getmv_by_tag'
+
+  const data = Object.assign({}, commonParams, {
+    loginUin: 0,
+    hostUin: 0,
+    platform: 'yqq',
+    needNewCode: 0,
+    lan: 'all',
+    cmd: 'shoubo'
+    // jsonpCallback: 'MusicJsonCallback02200965800659871'
+  })
+
+  return jsonp(url, data, options)
+}

@@ -1,36 +1,54 @@
 <template>
   <div class="recommend" ref="recommend">
-    <div>
-      <div v-if="recommends.length" class="slider-wrapper">
-        <slider>
-          <div v-for="item in recommends" :key="item.id">
-            <a :href="item.linkUrl">
-              <img class="needsclick" :src="item.picUrl">
-            </a>
-          </div>
-        </slider>
+    <Scroll ref="scroll" class="recommend-content">
+      <div>
+        <div v-if="recommends.length" class="slider-wrapper">
+          <slider>
+            <div v-for="item in recommends" :key="item.id">
+              <a :href="item.linkUrl">
+                <img class="needsclick" :src="item.picUrl">
+              </a>
+            </div>
+          </slider>
+        </div>
+        <div class="recommend-list">
+          <h1 class="list-title">热门歌单推荐</h1>
+          <ul>
+            <li class="item" v-for="item in discList" :key="item.mv_id">
+              <div class="icon">
+                <img width="60px" height="60px" :src="item.picurl" alt="">
+              </div>
+              <div class="text">
+                <h2 class="name">{{item.mvtitle}}</h2>
+                <p class="desc">{{item.mvdesc}}</p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="recommend-list">
-        <h1 class="list-title">热门歌单推荐</h1>
-      </div>
-    </div>
+    </Scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import {getRecommend} from 'api/recommend'
+import {getRecommend, getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 import Slider from 'components/base/slider/slider'
+import Scroll from 'components/base/scroll/scroll'
 
 export default {
   name: 'recommend',
   data () {
     return {
-      recommends: []
+      recommends: [],
+      discList: []
     }
   },
   created () {
-    this._getRecommend()
+    setTimeout(() => {
+      this._getRecommend()
+      this._getDiscList()
+    }, 3000)
   },
   methods: {
     _getRecommend () {
@@ -39,22 +57,30 @@ export default {
           this.recommends = res.data.slider
         }
       })
+    },
+    _getDiscList () {
+      getDiscList().then((res) => {
+        if (res.code === ERR_OK) {
+          this.discList = res.data.mvlist
+        }
+      })
     }
   },
   components: {
-    Slider
+    Slider,
+    Scroll
   }
 }
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import "~common/stylus/variable"
-
   .recommend
     position: fixed
     width: 100%
     top: 88px
     bottom: 0
+    z-index: -3
     /*过度*/
     .recommend-list
       .list-title
@@ -66,7 +92,7 @@ export default {
       .item
         display: flex
         box-sizing: border-box
-        align-items: center
+        align-items: center  //垂直居中
         padding: 0 20px 20px 20px
         .icon
           flex: 0 0 60px

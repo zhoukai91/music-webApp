@@ -10,3 +10,11 @@ export function addClass (el, className) {
     el.className = newClass.join(' ')
   }
 }
+
+export function getData (el, name, val) {
+  if (!val) {
+    el.dataset[name] = val
+  } else {
+    return el.dataset[name]
+  }
+}

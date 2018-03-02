@@ -16,7 +16,7 @@
           <ul>
             <li class="item" v-for="item in discList" :key="item.mv_id">
               <div class="icon">
-                <img width="60px" height="60px" :src="item.picurl" alt="">
+                <img width="60px" height="60px" v-lazy="item.picurl" alt="">
               </div>
               <div class="text">
                 <h2 class="name">{{item.mvtitle}}</h2>
@@ -24,6 +24,9 @@
               </div>
             </li>
           </ul>
+        </div>
+        <div class="loading-wrapper" v-if="!discList.length">
+          <Loading></Loading>
         </div>
       </div>
     </Scroll>
@@ -35,6 +38,7 @@ import {getRecommend, getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 import Slider from 'components/base/slider/slider'
 import Scroll from 'components/base/scroll/scroll'
+import Loading from 'components/base/loading/loading'
 
 export default {
   name: 'recommend',
@@ -45,10 +49,8 @@ export default {
     }
   },
   created () {
-    setTimeout(() => {
-      this._getRecommend()
-      this._getDiscList()
-    }, 3000)
+    this._getRecommend()
+    this._getDiscList()
   },
   methods: {
     _getRecommend () {
@@ -68,7 +70,8 @@ export default {
   },
   components: {
     Slider,
-    Scroll
+    Scroll,
+    Loading
   }
 }
 </script>

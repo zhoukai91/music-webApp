@@ -28,7 +28,7 @@
         </li>
       </ul>
     </div>
-    <div class="list-fixed">
+    <div class="list-fixed" ref="fixed">
       <div class="fixed-title">{{fixedTitle}}</div>
     </div>
     <div v-show="!data.length" class="loading-container">
@@ -43,6 +43,7 @@ import {getData} from 'common/js/dom'
 import Loading from 'components/base/loading/loading'
 
 const SHORTCUTLIST_HEIGHT = 18
+const TITLE_HEIGHT = 30
 export default {
   name: 'listview',
   props: {
@@ -100,7 +101,8 @@ export default {
         let height2 = this.listHeight[i + 1]
         if (-newY >= height1 && -newY < height2) {
           this.currentIndex = i
-          // this.diff = height2 + newY  //出现bug，fixedTitle 清空
+          //  出现bug，fixedTitle 清空
+          this.diff = height2 + newY
           return
         }
       }
@@ -137,8 +139,13 @@ export default {
         this._calculateHeight()
       }, 20)
     },
-    diff (newDiff) {
-      console.log(newDiff)
+    diff (newVal) {
+      let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0
+      if (this.fixedTop === fixedTop) {
+        return
+      }
+      this.fixedTop = fixedTop
+      this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`
     }
   },
   components: {

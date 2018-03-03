@@ -23,6 +23,7 @@
 import Scroll from 'components/base/scroll/scroll'
 import {getData} from 'common/js/dom'
 
+const SHORTCUTLIST_HEIGHT = 18
 export default {
   name: 'listview',
   props: {
@@ -39,15 +40,25 @@ export default {
     }
   },
   created () {
+    this.startY = 0
+    this.startIndex = 0
   },
   methods: {
-    onShortcutTouchStart (event) {
-      let toIndex = getData(event.target, 'index')
+    onShortcutTouchStart (e) {
+      this.startY = e.touches[0].clientY
+      let index = getData(e.target, 'index')
+      this.startIndex = parseInt(index)
       // 调用Scroll组件的内部方法
-      this.$refs.listview.toScrollElement(this.$refs.listGroup[toIndex])
-      // console.log(this.$refs.listview)
+      this._toScroll(index)
+    },
+    onShortcutTouchMove (e) {
+      let moveListLen = (e.touches[0].clientY - this.startY) / SHORTCUTLIST_HEIGHT | 0
+      let toIndex = this.startIndex + moveListLen
+      this._toScroll(toIndex)
+    },
+    _toScroll (index) {
+      this.$refs.listview.toScrollElement(this.$refs.listGroup[index])
     }
-    // onShortcutTouchMove () {}
   },
   components: {
     Scroll

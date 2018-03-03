@@ -12,7 +12,7 @@ export function addClass (el, className) {
 }
 
 export function getData (el, name, val) {
-  if (!val) {
+  if (val) {
     el.dataset[name] = val
   } else {
     return el.dataset[name]

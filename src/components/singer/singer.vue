@@ -29,7 +29,6 @@ export default {
           return false
         }
         this.singerList = this._normalizedSinger(res.data.list)
-        console.log(this.singerList)
       })
     },
     _normalizedSinger (list) {

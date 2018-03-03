@@ -44,8 +44,6 @@ export default {
       this.scroll.refresh && this.scroll.refresh()
     },
     toScrollElement () {
-      console.log('滚动to')
-      console.log(this.scroll)
       this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
     }
   }

@@ -17,6 +17,10 @@ export default {
     click: {
       type: Boolean,
       default: true
+    },
+    listenScroll: {
+      type: Boolean,
+      default: false
     }
   },
   mounted () {
@@ -32,6 +36,11 @@ export default {
         probeType: this.probeType,
         click: this.click
       })
+      if (this.listenScroll) {
+        this.scroll.on('scroll', (pos) => {
+          this.$emit('scroll', pos.y)
+        })
+      }
     },
     // 添加代理方法，方便父组件调用this.scroll的方法
     enable () {

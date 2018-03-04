@@ -9,7 +9,7 @@
       <li v-for="(group, index) in data" class="list-group" :key="index" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <uL>
-          <li  v-for="item in group.items" :key="item.id" class="list-group-item">
+          <li  v-for="item in group.items" :key="item.id" class="list-group-item" @click="selectItem(item)">
             <img class="avatar" v-lazy="item.avatar">
             <span class="name">{{item.name}}</span>
           </li>
@@ -90,6 +90,9 @@ export default {
       this.currentIndex = toIndex
       this._toScroll(toIndex)
     },
+    selectItem (item) {
+      this.$emit('selectItem', item)
+    },
     scroll (newY) {
       // 当滚动到顶部
       if (newY > 0) {
@@ -141,6 +144,7 @@ export default {
     },
     diff (newVal) {
       let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0
+      // 性能优化，减少dom操作
       if (this.fixedTop === fixedTop) {
         return
       }

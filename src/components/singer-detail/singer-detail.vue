@@ -5,10 +5,47 @@
 </template>
 
 <script type="text/ecmascript-6">
+import {mapGetters} from 'vuex'
+import {getSingerDetail} from 'api/singer'
+import {ERR_OK} from 'api/config'
+import {createSong} from 'common/js/song.js'
+
 export default {
   name: 'singer-detail',
+  data () {
+    return {
+      songs: []
+    }
+  },
   created () {
-    console.log('----')
+    this._getDetail(this.singer.id)
+  },
+  methods: {
+    _getDetail (singerId) {
+      if (!singerId) {
+        this.$router.push('/singer')
+        return
+      }
+      getSingerDetail(singerId).then((res) => {
+        if (ERR_OK === res.code) {
+          this.songs = this._normalizeSongs(res.data.list)
+          console.log(this.songs)
+        }
+      })
+    },
+    _normalizeSongs (lists) {
+      let ret = []
+      lists.forEach((item) => {
+        let {musicData} = item
+        if (musicData.albummid && musicData.songmid) {
+          ret.push(createSong(musicData))
+        }
+      })
+      return ret
+    }
+  },
+  computed: {
+    ...mapGetters(['singer'])
   }
 }
 </script>

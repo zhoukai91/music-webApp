@@ -51,7 +51,7 @@ export default {
   },
   deactivated () {
     // 存在问题，已经使用keep-alve组件，该slider组件将不会触发destroyes
-    console.log('组件销毁')
+    // console.log('组件销毁')
     clearTimeout(this.timer)
   },
   methods: {

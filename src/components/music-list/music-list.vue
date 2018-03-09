@@ -16,7 +16,7 @@
     <scroll @scroll="scroll" :listen-scroll="listenScroll" :probe-type="probeType" class="list" ref="list">
       <div class="song-list-wrapper" >
         <ul>
-          <li v-for="(song, index) in songs" :key="index" class="item">
+          <li v-for="(song, index) in songs" :key="index" class="item" @click="selectItem(index)">
             <div class="content">
               <h2 class="name">{{song.name}}</h2>
               <p class="desc">{{getDesc(song)}}</p>
@@ -32,7 +32,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import {mapGetters} from 'vuex'
+import {mapGetters, mapActions} from 'vuex'
 import Scroll from 'components/base/scroll/scroll'
 import loading from 'components/base/loading/loading'
 import {prefixSyle} from 'common/js/dom'
@@ -100,13 +100,23 @@ export default {
     getDesc (song) {
       return `${song.singer}·${song.album}`
     },
+    selectItem (index) {
+      this.selectPlay({
+        list: this.songs,
+        index
+      })
+    },
     _setMusicTop () {
       if (this.$refs.list) {
         // 设置list的TOP =  视口宽度 * 0.7
-        this.imageHeight = this.$refs.bgImage.clientHeight
+        this.imageHeight = document.body.clientWidth * 0.7
+        this.imageHeight = Math.min(this.imageHeight, 600)
         this.$refs.list.$el.style.top = this.imageHeight + 'px'
+        this.$refs.bgImage.style.paddingTop = '0'
+        this.$refs.bgImage.style.height = this.imageHeight + 'px'
       }
-    }
+    },
+    ...mapActions(['selectPlay'])
   },
   computed: {
     bgStyle () {

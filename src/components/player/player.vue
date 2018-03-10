@@ -22,7 +22,7 @@
           <div class="middle">
             <div class="middle-l" >
               <div class="cd-wrapper" ref="cdWrapper">
-                <div class="cd">
+                <div class="cd" :class="cdCls">
                   <img class="image" :src="currentSong.image">
                 </div>
               </div>
@@ -37,19 +37,19 @@
             </div>
             <div class="operators">
               <div class="icon i-left">
-                <i ></i>
+                <i class="icon-sequence"></i>
               </div>
-              <div class="icon i-left">
-                <i class="icon-prev"></i>
+              <div class="icon i-left" :class="disableCls">
+                <i @click="prev" class="icon-prev"></i>
               </div>
-              <div class="icon i-center" >
-                <i  ></i>
+              <div class="icon i-center" :class="disableCls">
+                <i @click="togglePlaying" :class="playIcon"></i>
               </div>
-              <div class="icon i-right" >
-                <i class="icon-next"></i>
+              <div class="icon i-right" :class="disableCls">
+                <i @click="next" class="icon-next"></i>
               </div>
               <div class="icon i-right">
-                <i class="icon" ></i>
+                <i class="icon-not-favorite" ></i>
               </div>
             </div>
           </div>
@@ -72,6 +72,7 @@
         </div>
       </div>
     </transition>
+    <audio ref="audio" autoplay :src="currentSong.url" @canplay="ready" @error="error"></audio>
   </div>
 </template>
 
@@ -83,6 +84,11 @@ import {prefixSyle} from 'common/js/dom'
 const transform = 'transform'
 
 export default {
+  data () {
+    return {
+      songReady: false
+    }
+  },
   methods: {
     back () {
       this.setFullScreent(false)
@@ -129,6 +135,48 @@ export default {
         done()
       }, 400)
     },
+    togglePlaying () {
+      console.log(this.songReady)
+      if (!this.songReady) {
+        return
+      }
+      this.setPlayingState(!this.playing)
+    },
+    next () {
+      if (!this.songReady) {
+        return
+      }
+      let index = this.currentIndex + 1
+      if (index === this.playlist.length) {
+        index = 0
+      }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.togglePlaying()
+      }
+      this.songReady = false
+    },
+    prev () {
+      if (!this.songReady) {
+        return
+      }
+      let index = this.currentIndex - 1
+      if (index === -1) {
+        index = this.playlist.length - 1
+      }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.togglePlaying()
+      }
+      this.songReady = false
+    },
+    ready () {
+      console.log(1)
+      this.songReady = true
+    },
+    error () {
+      this.songReady = true
+    },
     afterLeave () {
       this.$refs.cdWrapper.style.transition = ''
       this.$refs.cdWrapper.style[transform] = ''
@@ -154,21 +202,42 @@ export default {
       this.$refs.cdWrapper.style.left = left
     },
     ...mapMutations({
-      'setFullScreent': 'SET_FULL_SCREEN'
+      'setFullScreent': 'SET_FULL_SCREEN',
+      'setCurrentIndex': 'SET_CURRENT_INDEX',
+      'setPlayingState': 'SET_PLAYING_STATE'
     })
   },
   mounted () {
     this._resize()
-    window.onresize = () => {
-      this._resize()
-    }
   },
   computed: {
+    cdCls () {
+      return this.playing ? 'play' : 'play pause'
+    },
+    playIcon () {
+      return this.playing ? 'icon-pause' : 'icon-play'
+    },
+    miniIcon () {
+      return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+    },
+    disableCls () {
+      return this.songReady ? '' : 'disable'
+    },
     ...mapGetters([
       'playlist',
       'fullScreen',
-      'currentSong'
+      'currentSong',
+      'currentIndex',
+      'playing'
     ])
+  },
+  watch: {
+    playing (newPlaying) {
+      const audio = this.$refs.audio
+      this.$nextTick(() => {
+        newPlaying ? audio.play() : audio.pause()
+      })
+    }
   }
 }
 </script>

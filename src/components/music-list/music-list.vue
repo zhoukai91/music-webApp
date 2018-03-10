@@ -35,9 +35,9 @@
 import {mapGetters, mapActions} from 'vuex'
 import Scroll from 'components/base/scroll/scroll'
 import loading from 'components/base/loading/loading'
-import {prefixSyle} from 'common/js/dom'
+import {prefixStyle} from 'common/js/dom'
 
-const transform = prefixSyle('transform')
+const transform = prefixStyle('transform')
 const RESERVED_HEIGHT = 40
 
 export default {

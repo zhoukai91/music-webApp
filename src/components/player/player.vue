@@ -35,6 +35,13 @@
               <span class="dot" ></span>
               <span class="dot" ></span>
             </div>
+            <div class="progress-wrapper">
+              <span class="time time-l">{{formatDate(currentTime)}}</span>
+              <div class="progress-bar-wrapper">
+                <progress-bar @percentChange="percentChange" :percent="percent"></progress-bar>
+              </div>
+              <span class="time time-r">{{formatDate(currentSong.duration)}}</span>
+            </div>
             <div class="operators">
               <div class="icon i-left">
                 <i class="icon-sequence"></i>
@@ -58,8 +65,8 @@
     </transition>
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="open">
-        <div class="icon">
-          <img width="40" height="40" :src="currentSong.image">
+        <div class="icon" >
+          <img width="40" height="40" :class="cdCls" :src="currentSong.image">
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
@@ -72,7 +79,7 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" autoplay :src="currentSong.url" @canplay="ready" @error="error"></audio>
+    <audio ref="audio" autoplay :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
   </div>
 </template>
 
@@ -80,13 +87,15 @@
 import {mapGetters, mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixSyle} from 'common/js/dom'
+import ProgressBar from 'components/base/progress-bar/progress-bar'
 
 const transform = 'transform'
 
 export default {
   data () {
     return {
-      songReady: false
+      songReady: false,
+      currentTime: 0
     }
   },
   methods: {
@@ -171,7 +180,6 @@ export default {
       this.songReady = false
     },
     ready () {
-      console.log(1)
       this.songReady = true
     },
     error () {
@@ -180,6 +188,29 @@ export default {
     afterLeave () {
       this.$refs.cdWrapper.style.transition = ''
       this.$refs.cdWrapper.style[transform] = ''
+    },
+    updateTime (e) {
+      this.currentTime = e.target.currentTime
+    },
+    percentChange (percent) {
+      this.$refs.audio.currentTime = percent * this.currentSong.duration
+      if (!this.playing) {
+        this.togglePlaying()
+      }
+    },
+    formatDate (time) {
+      time = time | 0
+      let minute = time / 60 | 0
+      let second = this._pad(time % 60)
+      return `${minute}:${second}`
+    },
+    _pad (num, n = 2) {
+      let len = num.toString().length
+      while (len < 2) {
+        num = '0' + num
+        len++
+      }
+      return num
     },
     _getPosAndScale () {
       const targetWidth = 40
@@ -223,6 +254,9 @@ export default {
     disableCls () {
       return this.songReady ? '' : 'disable'
     },
+    percent () {
+      return this.currentTime / this.currentSong.duration
+    },
     ...mapGetters([
       'playlist',
       'fullScreen',
@@ -238,6 +272,9 @@ export default {
         newPlaying ? audio.play() : audio.pause()
       })
     }
+  },
+  components: {
+    ProgressBar
   }
 }
 </script>

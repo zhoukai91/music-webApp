@@ -39,7 +39,7 @@ let vendor = () => {
   return false
 }
 
-export function prefixSyle (style) {
+export function prefixStyle (style) {
   let prefix = vendor()
   if (prefix === false) {
     return false

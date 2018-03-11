@@ -43,8 +43,8 @@
               <span class="time time-r">{{formatDate(currentSong.duration)}}</span>
             </div>
             <div class="operators">
-              <div class="icon i-left">
-                <i class="icon-sequence"></i>
+              <div class="icon i-left" @click="changeMode">
+                <i :class="iconMode"></i>
               </div>
               <div class="icon i-left" :class="disableCls">
                 <i @click="prev" class="icon-prev"></i>
@@ -73,13 +73,16 @@
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
+          <progress-circle :radius="radius" :percent="percent">
+            <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i>
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
-    <audio ref="audio" autoplay :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
+    <audio ref="audio" autoplay :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
 
@@ -87,7 +90,10 @@
 import {mapGetters, mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixSyle} from 'common/js/dom'
+import {playMode} from 'common/js/config'
+import {shuffle} from 'common/js/util'
 import ProgressBar from 'components/base/progress-bar/progress-bar'
+import ProgressCircle from 'components/base/progress-circle/progress-circle'
 
 const transform = 'transform'
 
@@ -95,7 +101,8 @@ export default {
   data () {
     return {
       songReady: false,
-      currentTime: 0
+      currentTime: 0,
+      radius: 32
     }
   },
   methods: {
@@ -145,11 +152,26 @@ export default {
       }, 400)
     },
     togglePlaying () {
-      console.log(this.songReady)
       if (!this.songReady) {
         return
       }
       this.setPlayingState(!this.playing)
+    },
+    changeMode () {
+      this.setPlayMode((this.mode + 1) % 3)
+      let list = []
+      if (this.mode === playMode.sequence) {
+        list = this.sequenceList
+      } else if (this.mode === playMode.random) {
+        list = shuffle(this.sequenceList)
+      } else {
+        return false
+      }
+      let currentIndex = list.findIndex((item) => {
+        return item.id === this.currentSong.id
+      })
+      this.setPlayList(list)
+      this.setCurrentIndex(currentIndex)
     },
     next () {
       if (!this.songReady) {
@@ -182,8 +204,21 @@ export default {
     ready () {
       this.songReady = true
     },
+    end () {
+      console.log(this.mode)
+      if (this.mode === playMode.loop) {
+        this.loop()
+      } else {
+        this.next()
+      }
+    },
     error () {
       this.songReady = true
+    },
+    loop () {
+      this.$refs.audio.currentTime = 0
+      this.$refs.audio.play()
+      this.setPlayingState(true)
     },
     afterLeave () {
       this.$refs.cdWrapper.style.transition = ''
@@ -235,7 +270,9 @@ export default {
     ...mapMutations({
       'setFullScreent': 'SET_FULL_SCREEN',
       'setCurrentIndex': 'SET_CURRENT_INDEX',
-      'setPlayingState': 'SET_PLAYING_STATE'
+      'setPlayingState': 'SET_PLAYING_STATE',
+      'setPlayMode': 'SET_PLAY_MODE',
+      'setPlayList': 'SET_PLAYLIST'
     })
   },
   mounted () {
@@ -244,6 +281,9 @@ export default {
   computed: {
     cdCls () {
       return this.playing ? 'play' : 'play pause'
+    },
+    iconMode () {
+      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-random' : 'icon-loop'
     },
     playIcon () {
       return this.playing ? 'icon-pause' : 'icon-play'
@@ -262,10 +302,24 @@ export default {
       'fullScreen',
       'currentSong',
       'currentIndex',
-      'playing'
+      'playing',
+      'mode',
+      'sequenceList'
     ])
   },
   watch: {
+    currentSong (newSong, oldSong) {
+      if (!newSong.id) {
+        return
+      }
+      if (newSong.id === oldSong.id) {
+        return
+      }
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        this.$refs.audio.play()
+      }, 1000)
+    },
     playing (newPlaying) {
       const audio = this.$refs.audio
       this.$nextTick(() => {
@@ -274,7 +328,8 @@ export default {
     }
   },
   components: {
-    ProgressBar
+    ProgressBar,
+    ProgressCircle
   }
 }
 </script>

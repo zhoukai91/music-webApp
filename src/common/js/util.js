@@ -3,7 +3,7 @@ function getRandomInt (min, max) {
 }
 
 export function shuffle (arr) {
-  // 转化类数组
+  // 产生一个副本数组
   let _arr = arr.slice()
   for (let i = 0; i < _arr.length; i++) {
     let j = getRandomInt(0, i)

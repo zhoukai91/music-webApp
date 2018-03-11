@@ -317,6 +317,14 @@ export default {
       }
       clearTimeout(this.timer)
       this.timer = setTimeout(() => {
+        if (this.$refs.audio.error.code === 4) {
+          this.$toasted.error('对不起，暂时无法播放音频源~ ！~', {position: 'top-center'})
+          setTimeout(() => {
+            this.$toasted.clear()
+            this.setPlayingState(false)
+          }, 3000)
+          return false
+        }
         this.$refs.audio.play()
       }, 1000)
     },

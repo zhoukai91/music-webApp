@@ -37,6 +37,7 @@ export default {
   },
   methods: {
     progressClick (e) {
+      // 当点击btn时，e.offsetX值不对，存在bug
       this._setOffset(e.offsetX)
       this._triggerPercent()
     },

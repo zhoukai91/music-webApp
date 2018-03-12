@@ -37,8 +37,10 @@ export default {
   },
   methods: {
     progressClick (e) {
+      let rect = this.$refs.progressBar.getBoundingClientRect()
+      let left = e.pageX - rect.x
       // 当点击btn时，e.offsetX值不对，存在bug
-      this._setOffset(e.offsetX)
+      this._setOffset(left)
       this._triggerPercent()
     },
     progressTouchStart (e) {

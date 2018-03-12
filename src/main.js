@@ -6,8 +6,8 @@ import store from './store'
 import fastclick from 'fastclick'
 import lazyload from 'vue-lazyload'
 import Toasted from 'vue-toasted'
-
 import 'common/stylus/index.styl'
+
 Vue.config.productionTip = false
 fastclick.attach(document.body)
 Vue.use(lazyload, {loading: require('common/image/default.png')})

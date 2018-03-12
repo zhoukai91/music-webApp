@@ -9,6 +9,14 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
+const xml2map = require('xml2map')
+const iconv = require('iconv-lite');
+
+const express = require('express')
+var axios = require('axios')
+const app = express()
+var apiRoutes = express.Router()
+app.use('/api', apiRoutes)
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
@@ -42,6 +50,21 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
+    },
+    after(app) {
+      app.get('/api/lyric', (req, res) => {
+
+        var url = `http://music.qq.com/miniportal/static/lyric/5/${req.query.songmid}.xml`
+
+        axios.get(url).then((response) => {
+
+          var ret = response.data
+          xml2map.tojson(ret)
+          res.json(ret)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
     }
   },
   plugins: [

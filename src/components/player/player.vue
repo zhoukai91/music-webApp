@@ -92,6 +92,7 @@ import animations from 'create-keyframe-animation'
 import {prefixSyle} from 'common/js/dom'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
+import {getLyric} from 'api/song'
 import ProgressBar from 'components/base/progress-bar/progress-bar'
 import ProgressCircle from 'components/base/progress-circle/progress-circle'
 
@@ -315,9 +316,15 @@ export default {
       if (newSong.id === oldSong.id) {
         return
       }
+      getLyric(this.currentSong.id).then((res) => {
+        console.log(typeof res)
+        let reg = /<lyric>([\w]+)<\/lyric>/
+        let matches = res.match(reg)
+        console.log(matches)
+      })
       clearTimeout(this.timer)
       this.timer = setTimeout(() => {
-        if (this.$refs.audio.error.code === 4) {
+        if (this.$refs.audio.error && this.$refs.audio.error.code === 4) {
           this.$toasted.error('对不起，暂时无法播放音频源~ ！~', {position: 'top-center'})
           setTimeout(() => {
             this.$toasted.clear()

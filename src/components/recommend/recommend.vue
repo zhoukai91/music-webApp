@@ -1,44 +1,46 @@
 <template>
-  <div class="recommend" ref="recommend">
-    <Scroll ref="scroll" class="recommend-content">
+  <div class='recommend' ref='recommend'>
+    <Scroll ref='scroll' class='recommend-content'>
       <div>
-        <div v-if="recommends.length" class="slider-wrapper">
+        <div v-if='recommends.length' class='slider-wrapper'>
           <slider>
-            <div v-for="item in recommends" :key="item.id">
-              <a :href="item.linkUrl">
-                <img class="needsclick" :src="item.picUrl">
+            <div v-for='item in recommends' :key='item.id'>
+              <a :href='item.linkUrl'>
+                <img class='needsclick' :src='item.picUrl'>
               </a>
             </div>
           </slider>
         </div>
-        <div class="recommend-list">
-          <h1 class="list-title">热门歌单推荐</h1>
+        <div class='recommend-list'>
+          <h1 class='list-title'>热门歌单推荐</h1>
           <ul>
-            <li class="item" v-for="item in discList" :key="item.mv_id">
-              <div class="icon">
-                <img width="60px" height="60px" v-lazy="item.picurl" alt="">
+            <li class='item' v-for='item in discList' @click='selectItem(item)' :key='item.mv_id'>
+              <div class='icon'>
+                <img width='60px' height='60px' v-lazy='item.cover' alt=''>
               </div>
-              <div class="text">
-                <h2 class="name">{{item.mvtitle}}</h2>
-                <p class="desc">{{item.mvdesc}}</p>
+              <div class='text'>
+                <h2 class='name'>{{item.title}}</h2>
+                <p class='desc'>{{item.username}}</p>
               </div>
             </li>
           </ul>
         </div>
-        <div class="loading-wrapper" v-if="!discList.length">
+        <div class='loading-wrapper' v-if='!discList.length'>
           <Loading></Loading>
         </div>
       </div>
     </Scroll>
+    <router-view></router-view>
   </div>
 </template>
 
-<script type="text/ecmascript-6">
+<script type='text/ecmascript-6'>
 import {getRecommend, getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 import Slider from 'components/base/slider/slider'
 import Scroll from 'components/base/scroll/scroll'
 import Loading from 'components/base/loading/loading'
+import {mapMutations} from 'vuex'
 
 export default {
   name: 'recommend',
@@ -53,6 +55,12 @@ export default {
     this._getDiscList()
   },
   methods: {
+    selectItem (item) {
+      this.$router.push({
+        path: `/recommend/${item.content_id}`
+      })
+      this.setDisc(item)
+    },
     _getRecommend () {
       getRecommend().then((res) => {
         if (res.code === ERR_OK) {
@@ -62,11 +70,15 @@ export default {
     },
     _getDiscList () {
       getDiscList().then((res) => {
+        res = res.recomPlaylist
         if (res.code === ERR_OK) {
-          this.discList = res.data.mvlist
+          this.discList = res.data.v_hot
         }
       })
-    }
+    },
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    })
   },
   components: {
     Slider,
@@ -76,8 +88,8 @@ export default {
 }
 </script>
 
-<style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~common/stylus/variable"
+<style scoped lang='stylus' rel='stylesheet/stylus'>
+  @import '~common/stylus/variable'
   .recommend
     position: fixed
     width: 100%

@@ -79,7 +79,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         })
       })
       app.get('/api/lyric', (req, res) => {
-        var url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg'
+        var url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
 
         axios.get(url, {
           headers: {

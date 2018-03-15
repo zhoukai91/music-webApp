@@ -18,6 +18,17 @@ export default class Song {
     }
     return new Promise((resolve, reject) => {
       getLyric(this.mid).then((res) => {
+        let ret = res
+        if (typeof ret === 'string') {
+          // var reg = /^\w+\(({[^()]+})\)$/
+          var reg = /^\w+\(([^\r]+)\)$/
+          var matches = ret.match(reg)
+          if (matches) {
+            console.log(matches[1])
+            ret = JSON.parse(matches[1])
+            res = ret
+          }
+        }
         if (res.code === ERR_OK) {
           this.lyric = res.lyric
           resolve(res.lyric)
@@ -40,7 +51,7 @@ export function createSong (musicData) {
     duration: musicData.interval,
     image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
     // 有些歌曲链接不可以
-    url: `http://isure.stream.qqmusic.qq.com/C100${musicData.songmid}.m4a?ffromtag=32`})
+    url: `http://isure.stream.qqmusic.qq.com/C100${musicData.songmid}.m4a?fromtag=32`})
 }
 
 function filterSinger (singer) {

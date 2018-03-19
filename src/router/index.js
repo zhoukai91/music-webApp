@@ -30,7 +30,13 @@ export default new Router({
         {path: ':id', component: Disc}
       ]
     },
-    {path: '/search', component: Search},
+    {
+      path: '/search',
+      component: Search,
+      children: [
+        {path: ':id', component: SingerDetail}
+      ]
+    },
     {
       path: '/singer',
       component: Singer,

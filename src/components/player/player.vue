@@ -35,9 +35,9 @@
                 <div class="playing-lyric">{{playingLyric}}</div>
               </div>
             </div>
-            <scroll class="middle-r" ref="lyricList" v-show="showLyric" :data="currentLyric && currentLyric.lines">
+            <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
               <div class="lyric-wrapper">
-                <div v-if="currentLyric">
+                <div v-if="currentLyric && showLyric">
                   <p ref="lyricLine"
                      class="text"
                      :class="{'current': currentLineNum ===index}"
@@ -129,8 +129,11 @@ export default {
     }
   },
   created () {
-    this.lientWith = window.innerWidth
     this.touch = {}
+    this.playState = {
+      music: false,
+      lyric: false
+    }
   },
   methods: {
     back () {
@@ -205,6 +208,7 @@ export default {
       if (!this.songReady) {
         return
       }
+      this.$refs.audio.currentTime = 0
       if (this.playlist.length === 1) {
         this.loop()
         return false
@@ -224,6 +228,7 @@ export default {
       if (!this.songReady) {
         return
       }
+      this.$refs.audio.currentTime = 0
       if (this.playlist.length === 1) {
         this.loop()
         return false
@@ -245,6 +250,10 @@ export default {
     },
     ready () {
       this.songReady = true
+      this.playState.music = true
+      if (!this.playing) {
+        this._restartPlay()
+      }
     },
     end () {
       console.log(this.mode)
@@ -292,7 +301,9 @@ export default {
       this.currentSong.getLyric().then((lyric) => {
         this.currentLyric = new Lyric(lyric, this.handelLyric)
         if (this.playing) {
+          // 拿不到this 值  bug:
           this.currentLyric.play()
+          this._restartPlay()
           this.showLyric = true
         }
       }).catch((err) => {
@@ -302,6 +313,9 @@ export default {
       })
     },
     handelLyric ({lineNum, txt}) {
+      if (!this.$refs.lyricList) {
+        return false
+      }
       this.currentLineNum = lineNum
       if (lineNum > 5) {
         this.$refs.lyricList.toScrollElement(this.$refs.lyricLine[lineNum - 5], 1000)
@@ -399,6 +413,15 @@ export default {
       let left = width * 0.8 > 600 ? document.body.clientWidth * 0.5 - 300 + 'px' : '10%'
       this.$refs.cdWrapper.style.left = left
     },
+    _restartPlay () {
+      let time = this.$refs.audio.currentTime
+      try {
+        this.currentLyric && this.currentLyric.seek(time * 1000)
+        this.$refs.audio && this.$refs.audio.play()
+      } catch (e) {
+        console.log(e)
+      }
+    },
     ...mapMutations({
       'setFullScreent': 'SET_FULL_SCREEN',
       'setCurrentIndex': 'SET_CURRENT_INDEX',
@@ -409,6 +432,7 @@ export default {
   },
   mounted () {
     this._resize()
+    window.onresize = this._resize
   },
   computed: {
     cdCls () {
@@ -465,7 +489,7 @@ export default {
           clearToast(this)
           return false
         }
-        this.$refs.audio.play()
+        this.songReady && this.$refs.audio.play()
         this.lyric()
         // 1000ms   延时，为了保证微信浏览器从后台 切换前台时，可以正常播放
       }, 1000)

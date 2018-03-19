@@ -24,9 +24,8 @@ export default class Song {
           var reg = /^\w+\(([^\r]+)\)$/
           var matches = ret.match(reg)
           if (matches) {
-            console.log(matches[1])
             ret = JSON.parse(matches[1])
-            res = ret
+            res = ret || res
           }
         }
         if (res.code === ERR_OK) {
@@ -34,8 +33,11 @@ export default class Song {
           resolve(res.lyric)
         } else {
           /* eslint-disable */
-          reject('no lyric')
+          reject('歌词解析出错')
         }
+      }).catch((e) => {
+        /* eslint-disable */
+        reject('没有找到歌词')
       })
     })
   }
